@@ -5,6 +5,7 @@ I needed a static web generator like ruby's middleman which can run on Windows.
   - gulp
   - BrowserSync
   - sass
+  - ejs (layout, partial)
 
 ## Dependency
   - node 6.x
