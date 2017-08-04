@@ -1,4 +1,4 @@
-# gulp-static-web
+# gulp-static-web-generator
 I needed a static web generator like ruby's middleman which can run on Windows.
 
 ## Spec
