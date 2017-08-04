@@ -27,8 +27,8 @@
                 'src/styles/**/*.scss', 
                 'src/styles/**/*.css'
             ],
-            build: build + '/vendor',
-            serve: serve + '/vendor'
+            build: build + '/assets',
+            serve: serve + '/assets'
         },
         
         scripts:{
@@ -36,8 +36,8 @@
                 './src/scripts/libs/*',
                 './src/scripts/*'
             ],
-            build: build + '/vendor',
-            serve: serve + '/vendor'
+            build: build + '/assets',
+            serve: serve + '/assets'
         },
         
         image: {
