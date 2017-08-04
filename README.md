@@ -2,10 +2,11 @@
 I needed a static web generator like ruby's middleman which can run on Windows.
 
 ## Spec
-  - gulp
-  - BrowserSync
-  - sass
-  - ejs (layout, partial)
+  - [x] gulp
+  - [x] BrowserSync
+  - [x] sass
+  - [x] ejs (layout, partial)
+  - [ ] lint
 
 ## Dependency
   - node 6.x
