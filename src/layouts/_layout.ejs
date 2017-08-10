@@ -29,10 +29,36 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
     <!-- Your styles -->
-    <link rel="stylesheet" href="/assets/main.css">
+    <link rel="stylesheet" href="/assets/default.css">
+    <link rel="stylesheet" href="/assets/app.css">
 </head>
 <body>
-    <%- body %>
+    <div id="master-container">
+        <header id="master-header">
+            <div id="top">
+                <span class="brand">
+                    ForontEnd
+                </span>
+            </div>
+            <div id="gnb">
+                <a id="menu-open-action">
+                    =
+                </a>
+                <menu>
+                    <li><a href="/index.html">Index</a></li>
+                    <li><a href="/dashboard.html">Dashboard</a></li>
+                    <li><a href="/list.html">List</a></li>
+                </menu>
+            </div>
+        </header>
+        <main>
+            <%- body %>
+        </main>
+        <footer id="master-footer">
+            
+        </footer>
+    </div>
+    
     <!-- build:js scripts/main.min.js -->
     <script src="/assets/jquery.js"></script>
     <script src="/assets/main.js"></script>

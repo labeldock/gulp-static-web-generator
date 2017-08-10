@@ -1,1 +1,114 @@
-body { color:gray; }
+@import '_codykit';
+
+@include codykit-document-basic;
+
+#master-container {
+    position:relative;
+    
+    @include media-tablet {
+        margin-left:60px;
+    }
+}
+
+#master-header {
+    
+    #top {
+        padding:0 20px;
+        height:60px;
+        line-height:60px;
+        border-bottom: 1px solid #eeeff1;
+        color:#5B5A5D;
+        
+        @include media-mobile {
+            padding-left:80px
+        }
+        
+        .brand {
+            
+        }
+    }
+    #gnb {
+        background-color:#313237;
+        color:#ACACAE;
+        font-size:12px;
+        
+        > a {
+            cursor:pointer;
+        }
+        
+        @include media-desktop {
+            padding:10px 20px;
+            > a {
+                display:none;
+            }
+            > menu {
+                text-align:right;
+                > li {
+                    @include inline-block;
+                    + li {
+                        &:before {
+                            content:" | ";
+                        }
+                    }
+                }
+            }
+        }
+      
+        @include media-desktop-lt {
+            position:fixed;
+            width:60px;
+            top:0;
+            left:0;
+            bottom:0;
+            
+            > a {
+                display:block;
+                height:60px;
+                line-height:60px;
+                border-bottom:1px solid #48494E;
+                text-align:center;
+            
+            }
+        
+            > menu {
+                > li {
+                    height:60px;
+                    line-height:60px;
+                    border-bottom:1px solid #48494E;
+                    text-align:center;
+                }
+            }
+        }
+        
+        @include media-mobile {
+            background-color:transparent;
+            
+            > a { 
+               border-bottom-width:0px; 
+            }
+            
+            > menu {
+                display:none;
+            }
+            
+            &[open] {
+                width:100%;
+                z-index:1;
+                > a {
+                  width:60px;  
+                }
+                > menu {
+                    
+                    display:block;
+                    background-color:#313237;
+                }
+            }
+        }
+    }
+}
+
+main {
+    #location {
+        padding:0 20px;
+    }
+}
