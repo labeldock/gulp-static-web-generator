@@ -52,7 +52,8 @@
         },
         server: {
             bootOnServe:true,
-            port:7890
+            port:7890,
+            apiPath:"/api"
         }
     });
     

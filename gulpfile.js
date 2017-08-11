@@ -161,14 +161,17 @@ gulp.task('serve', ['ejs', 'scripts', 'styles'], function () {
             this.stderr.pipe(process.stderr);
         });
         
-        browserSyncConfig.server.middleware = [
-            proxy('/api',{
-                target: 'http://localhost:' + run.server.port,
-                pathRewrite: {'^/api' : '/'},
-                changeOrigin: true,
-                logLevel: 'debug'
-            })
-        ];
+        
+        var proxyConfig = {
+            target: 'http://localhost:' + run.server.port,
+            pathRewrite: {},
+            changeOrigin: true,
+            logLevel: 'debug'
+        };
+        
+        proxyConfig.pathRewrite['^' + run.server.apiPath] = '/';
+        
+        browserSyncConfig.server.middleware = [proxy(run.server.apiPath,proxyConfig)];
     }
     
     browserSync(browserSyncConfig);
