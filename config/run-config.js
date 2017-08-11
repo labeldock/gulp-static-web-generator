@@ -8,8 +8,11 @@
     define({
         build: build,
         src: src,
-        serve: serve,
         main: main,
+        
+        serve: serve,
+        servePort: 3000,
+        serveStartPath:'/',
 
         ejs: {
             src: [
@@ -47,10 +50,9 @@
                 optimizationLevel: 8
             }
         },
-
-        favicon: {
-            src: src + '/favicon.ico',
-            build: build
+        server: {
+            bootOnServe:true,
+            port:7890
         }
     });
     

@@ -134,20 +134,51 @@ gulp.task('clean', function () {
 
 // Watch files for changes & reload
 gulp.task('serve', ['ejs', 'scripts', 'styles'], function () {
-    browserSync({
+    
+    var browserSyncConfig = {
         notify: false,
         logPrefix: 'BS',
         scrollElementMapping: ['main', '.mdl-layout'],
-        server: [run.serve],
-        port: 3000
-    });
+        startPath:run.serveStartPath,
+        server: {
+            baseDir: run.serve,
+            port: run.servePort
+        }
+    };
+    
+    //temporary api server
+    if(run.server.bootOnServe){
+        var nodemon = require('nodemon');
+        var proxy   = require('http-proxy-middleware');
+        
+        nodemon({
+            script: 'server/api-server.js',
+            ignore: ['./config','./builid','./src','./.tmp'],
+            ext: 'js',
+            stdout: false
+        }).on('readable', function () {
+            this.stdout.pipe(process.stdout);
+            this.stderr.pipe(process.stderr);
+        });
+        
+        browserSyncConfig.server.middleware = [
+            proxy('/api',{
+                target: 'http://localhost:' + run.server.port,
+                pathRewrite: {'^/api' : '/'},
+                changeOrigin: true,
+                logLevel: 'debug'
+            })
+        ];
+    }
+    
+    browserSync(browserSyncConfig);
     
     gulp.watch(['src/**/*.html'], reload);
     gulp.watch(['src/styles/**/*.{scss,css}'], ['styles', reload]);
     gulp.watch(['src/scripts/**/*.js'], ['scripts', reload]);
     gulp.watch(['src/images/**/*'], reload);
-    
     gulp.watch('src/**/*.ejs', ['ejs:reload']);
+
 });
 
 // Build and serve the output from the dist build
