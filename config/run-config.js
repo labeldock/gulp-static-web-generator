@@ -18,7 +18,7 @@
             ],
             build: build,
             serve: serve,
-            data: {},
+            data: require('./ejs-content.js'),
             options: {ext:'.html',layouts:'./'+src+'/layouts'}
         },
         

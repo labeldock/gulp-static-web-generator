@@ -4,6 +4,10 @@
         <h1>List Page</h1>
     </header>
     <div class="stage">
-        <p>'Allo, 'Allo!</p>
+        <ul>
+            <% list.forEach(item=>{ %>
+            <li><%= item.name %></li>
+            <% }) %>
+        </ul>
     </div>
 </section>
