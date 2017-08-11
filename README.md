@@ -6,6 +6,7 @@ I needed a static web generator like ruby's middleman which can run on Windows.
   - [x] BrowserSync
   - [x] sass
   - [x] ejs (layout, partial)
+  - [x] temporary api server
 
 ## Todo
   - [ ] lint
