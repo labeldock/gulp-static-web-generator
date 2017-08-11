@@ -17,4 +17,5 @@
 node_modules
 build/
 .tmp
-
+Logs
+package-lock.json
