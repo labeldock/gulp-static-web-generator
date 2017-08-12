@@ -11,12 +11,12 @@ http.get('/', function(req, res){
 //simple sudo db
 http.get('/db/:name', function(req, res){
     var db = adapt(req.params.name);
-    res.send(db.get());
+    res.send(db.select().get());
 });
 
-http.get('/db/:name/put/:path', function(req, res){
+http.get('/db/:name/:path', function(req, res){
     var db = adapt(req.params.name);
-    db.put(req.params.path, req.query).save();
+    db.select(req.params.path).set(req.query).save();
     res.redirect(`/db/${req.params.name}`);
 });
 
