@@ -14,6 +14,8 @@
         servePort: 3000,
         serveStartPath:'/',
 
+        temporaryDist:'dist',
+
         ejs: {
             src: [
                 main + '/**/*.ejs',

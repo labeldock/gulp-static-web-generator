@@ -129,7 +129,12 @@ gulp.task('html', function () {
 
 // Clean output directory
 gulp.task('clean', function () {
-    del([run.serve, run.build, '!dist/.git'], { dot: true });
+    return del([run.serve, run.build, '!dist/.git'], { dot: true });
+});
+
+gulp.task('clean:dist', function(){
+    console.log("run.temporaryDist",run.temporaryDist);
+    return del(['dist'], { dot: true });
 });
 
 // Watch files for changes & reload
@@ -185,7 +190,7 @@ gulp.task('serve', ['ejs', 'scripts', 'styles'], function () {
 
 // Build production files, the default task
 gulp.task('build', ['clean'], function (cb) {
-  runSequence('styles', ['html', 'scripts', 'ejs', 'images', 'copy'], cb);
+  runSequence('styles', ['html', 'scripts', 'ejs', 'images', 'copy','clean:dist'], cb);
 });
 
 // Build and serve the output from the dist build
