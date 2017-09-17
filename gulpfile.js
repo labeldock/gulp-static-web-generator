@@ -138,7 +138,6 @@ gulp.task('serve', ['ejs', 'scripts', 'styles'], function () {
     var browserSyncConfig = {
         notify: false,
         logPrefix: 'BS',
-        scrollElementMapping: ['main', '.mdl-layout'],
         startPath:run.serveStartPath,
         server: {
             baseDir: run.serve,
@@ -184,22 +183,24 @@ gulp.task('serve', ['ejs', 'scripts', 'styles'], function () {
 
 });
 
-// Build and serve the output from the dist build
-gulp.task('serve:dist', ['default'], function () {
-    browserSync({
-        notify: false,
-        logPrefix: 'BS',
-        scrollElementMapping: ['main', '.mdl-layout'],
-        // Run as an https by uncommenting 'https: true' Note: this uses an unsigned certificate which on first access will present a certificate warning in the browser.
-        // https: true,
-        server: 'dist',
-        port: 3001
-    });
-});
-
 // Build production files, the default task
 gulp.task('build', ['clean'], function (cb) {
   runSequence('styles', ['html', 'scripts', 'ejs', 'images', 'copy'], cb);
+});
+
+// Build and serve the output from the dist build
+gulp.task('serve:build', ['build'], function () {
+    browserSync({
+        notify: false,
+        logPrefix: 'SB',
+        startPath:run.serveStartPath,
+        // Run as an https by uncommenting 'https: true' Note: this uses an unsigned certificate which on first access will present a certificate warning in the browser.
+        // https: true,
+        server:  {
+            baseDir: 'build',
+            port: run.servePort
+        }
+    });
 });
 
 gulp.task('default', ['serve']);
