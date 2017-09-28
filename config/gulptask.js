@@ -1,5 +1,7 @@
 (function(define){
     
+    console.log("\n  gulp-static-web-generator v0.2 \n");
+    
     define({
         server: {
             bootOnServe:true,
