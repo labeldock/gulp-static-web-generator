@@ -1,0 +1,1 @@
+# This is an output from gulp-static-web-generator

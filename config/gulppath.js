@@ -45,6 +45,14 @@
             serve: serve + '/assets'
         },
         
+        public:{
+            src:[
+                './src/public/*'
+            ],
+            build: build,
+            serve: serve
+        },
+        
         image: {
             src: src + '/images/**/*.+(jpg|jpeg|png|gif|svg)',
             build: build + '/image',

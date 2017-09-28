@@ -23,11 +23,25 @@ var reload = browserSync.reload;
 
 // Lint JavaScript
 gulp.task('lint', function () {
-    return gulp.src(['src/scripts/**/*.js', '!node_modules/**'])
+    return gulp.src(['src/scripts/**/*.js', '!src/scripts/**/libs/*', '!node_modules/**'])
+        .pipe(plumber())
         .pipe(gulpEslint())
         .pipe(gulpEslint.format())
         .pipe(gulpIf(!browserSync.active, gulpEslint.failAfterError()));
 });
+
+// public
+(function(stylesTask){
+    gulp.task('compile:public:serve', stylesTask(gulppath.public.serve));
+    gulp.task('compile:public:build', stylesTask(gulppath.public.build));    
+}(function(destPath){
+    return function(){
+        return gulp.src(gulppath.public.src)
+        .pipe(plumber())
+        .pipe(gulp.dest(destPath))
+        .pipe(gulpSize({ title: 'public' }));
+    };
+}));
 
 // styles
 (function(stylesTask){
@@ -111,7 +125,7 @@ gulp.task('clean', function () {
 });
 
 // Watch files for changes & reload
-gulp.task('serve', ['compile:ejs:serve', 'compile:scripts:serve', 'compile:styles:serve'], function () {
+gulp.task('serve', ['compile:public:serve', 'compile:ejs:serve', 'compile:scripts:serve', 'compile:styles:serve'], function () {
     
     var browserSyncConfig = {
         notify: false,
@@ -162,7 +176,7 @@ gulp.task('serve', ['compile:ejs:serve', 'compile:scripts:serve', 'compile:style
 
 // Build production files, the default task
 gulp.task('build', ['clean'], function (cb) {
-  runSequence(['compile:styles:build', 'compile:ejs:build', 'compile:scripts:build'], cb);
+  runSequence(['compile:public:build', 'compile:styles:build', 'compile:ejs:build', 'compile:scripts:build'], cb);
 });
 
 // Build and serve the output from the dist build

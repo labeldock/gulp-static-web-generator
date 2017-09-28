@@ -7,10 +7,11 @@ I needed a static web generator like ruby's middleman which can run on Windows.
   - [x] sass
   - [x] ejs (layout, partial)
   - [x] temporary api server
-
+  - [x] pubilc folder
+  
 ## Todo
   - [ ] lint
-  - [ ] pubilc folder
+  - [ ] stable
 
 ## Dependency
   - node 6.x
