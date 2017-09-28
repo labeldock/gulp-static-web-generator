@@ -1,4 +1,6 @@
-var run = require('./config/run-config');
+var gulptask = require('./config/gulptask');
+var gulppath = require('./config/gulppath');
+
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gulpNewer = require('gulp-newer');
@@ -19,20 +21,6 @@ var browserSync = require('browser-sync');
 var del = require('del');
 var reload = browserSync.reload;
 
-var SETUP = {
-    AUTOPREFIXER_BROWSERS:[
-        'ie >= 10',
-        'ie_mob >= 10',
-        'ff >= 30',
-        'chrome >= 34',
-        'safari >= 7',
-        'opera >= 23',
-        'ios >= 7',
-        'android >= 4.4',
-        'bb >= 10'
-    ]
-};
-
 // Lint JavaScript
 gulp.task('lint', function () {
     return gulp.src(['src/scripts/**/*.js', '!node_modules/**'])
@@ -41,32 +29,18 @@ gulp.task('lint', function () {
         .pipe(gulpIf(!browserSync.active, gulpEslint.failAfterError()));
 });
 
-// Optimize images
-gulp.task('images', function () {
-    return gulp.src('src/images/**/*')
-        .pipe(gulp.dest('dist/images'))
-        .pipe(gulpSize({ title: 'images' }));
-});
-
-// Copy all files at the root level (app)
-gulp.task('copy', function () {
-    return gulp.src(['src/*', '!src/*.html'], {dot: true})
-        .pipe(gulp.dest('dist'))
-        .pipe(gulpSize({ title: 'copy' }));
-});
-
 // styles
 (function(stylesTask){
-    gulp.task('compile:styles:serve', stylesTask(run.styles.serve));
-    gulp.task('compile:styles:build', stylesTask(run.styles.build));    
+    gulp.task('compile:styles:serve', stylesTask(gulppath.styles.serve));
+    gulp.task('compile:styles:build', stylesTask(gulppath.styles.build));    
 }(function(destPath){
     return function(){
-        return gulp.src(run.styles.src)
+        return gulp.src(gulppath.styles.src)
         .pipe(plumber())
         .pipe(gulpNewer(destPath))
         .pipe(gulpSourcemaps.init())
         .pipe(gulpSass({outputStyle: 'compact'}).on('error', gulpSass.logError))
-        .pipe(gulpAutoprefixer(SETUP.AUTOPREFIXER_BROWSERS))
+        .pipe(gulpAutoprefixer(gulptask.autoprefixer))
         .pipe(gulpSourcemaps.write('/sourcemaps'))
         .pipe(gulp.dest(destPath))
         .pipe(gulpSize({ title: 'styles' }));
@@ -75,11 +49,11 @@ gulp.task('copy', function () {
 
 // scripts
 (function(scriptsTask){
-    gulp.task('compile:scripts:serve', scriptsTask(run.scripts.serve));
-    gulp.task('compile:scripts:build', scriptsTask(run.scripts.build));
+    gulp.task('compile:scripts:serve', scriptsTask(gulppath.scripts.serve));
+    gulp.task('compile:scripts:build', scriptsTask(gulppath.scripts.build));
 }(function(destPath){
     return function(){
-        return gulp.src(run.scripts.src)
+        return gulp.src(gulppath.scripts.src)
         .pipe(plumber())
         .pipe(gulpNewer(destPath))
         .pipe(gulpSourcemaps.init())
@@ -92,13 +66,13 @@ gulp.task('copy', function () {
 
 // ejs
 (function(ejsTask){
-    gulp.task('compile:ejs:serve', ejsTask(run.ejs.serve));
-    gulp.task('compile:ejs:build', ejsTask(run.ejs.build));
+    gulp.task('compile:ejs:serve', ejsTask(gulppath.ejs.serve));
+    gulp.task('compile:ejs:build', ejsTask(gulppath.ejs.build));
 }(function(destPath){
     return function() {
-        return gulp.src(run.ejs.src)
+        return gulp.src(gulppath.ejs.src)
         .pipe(plumber())
-        .pipe(ejsMonster(run.ejs.data,run.ejs.options))
+        .pipe(ejsMonster(gulppath.ejs.data,gulppath.ejs.options))
         .pipe(gulp.dest(destPath));
     };
 }));
@@ -128,12 +102,12 @@ gulp.task('html', function () {
 });
 
 gulp.task('clean:all', function(){
-    return del([run.serve, run.build]);
+    return del([gulppath.serve, gulppath.build]);
 });
 
 // Clean output directory
 gulp.task('clean', function () {
-    return del([run.serve, run.build, '!dist/.git'], { dot: true });
+    return del([gulppath.serve, gulppath.build, '!dist/.git'], { dot: true });
 });
 
 // Watch files for changes & reload
@@ -142,15 +116,15 @@ gulp.task('serve', ['compile:ejs:serve', 'compile:scripts:serve', 'compile:style
     var browserSyncConfig = {
         notify: false,
         logPrefix: 'BS',
-        startPath:run.serveStartPath,
+        startPath:gulppath.serveStartPath,
         server: {
-            baseDir: run.serve,
-            port: run.servePort
+            baseDir: gulppath.serve,
+            port: gulppath.servePort
         }
     };
     
     //temporary api server
-    if(run.server.bootOnServe){
+    if(gulptask.server.bootOnServe){
         var nodemon = require('nodemon');
         var proxy   = require('http-proxy-middleware');
         
@@ -166,15 +140,15 @@ gulp.task('serve', ['compile:ejs:serve', 'compile:scripts:serve', 'compile:style
         
         
         var proxyConfig = {
-            target: 'http://localhost:' + run.server.port,
+            target: 'http://localhost:' + gulptask.server.port,
             pathRewrite: {},
             changeOrigin: true,
             logLevel: 'debug'
         };
         
-        proxyConfig.pathRewrite['^' + run.server.apiPath] = '/';
+        proxyConfig.pathRewrite['^' + gulptask.server.apiPath] = '/';
         
-        browserSyncConfig.server.middleware = [proxy(run.server.apiPath,proxyConfig)];
+        browserSyncConfig.server.middleware = [proxy(gulptask.server.apiPath,proxyConfig)];
     }
     
     browserSync(browserSyncConfig);
@@ -188,7 +162,7 @@ gulp.task('serve', ['compile:ejs:serve', 'compile:scripts:serve', 'compile:style
 
 // Build production files, the default task
 gulp.task('build', ['clean'], function (cb) {
-  runSequence(['compile:styles:build', 'compile:ejs:build', 'compile:scripts:build', 'copy'], cb);
+  runSequence(['compile:styles:build', 'compile:ejs:build', 'compile:scripts:build'], cb);
 });
 
 // Build and serve the output from the dist build
@@ -196,12 +170,12 @@ gulp.task('serve:build', ['build'], function () {
     browserSync({
         notify: false,
         logPrefix: 'SB',
-        startPath:run.serveStartPath,
+        startPath:gulppath.serveStartPath,
         // Run as an https by uncommenting 'https: true' Note: this uses an unsigned certificate which on first access will present a certificate warning in the browser.
         // https: true,
         server:  {
             baseDir: 'build',
-            port: run.servePort
+            port: gulppath.servePort
         }
     });
 });

@@ -1,5 +1,5 @@
 (function(define){
-    var run        = require('../../config/run-config');
+    var gulptask   = require('../../config/gulptask');
     var express    = require('express');
     var bodyParser = require('body-parser');
     
@@ -7,7 +7,7 @@
     var app = express();
 
     //express server config 
-    app.set('port',run.server.port);  //http://localhost:7890
+    app.set('port',gulptask.port);  //http://localhost:7890
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({
         extended: true

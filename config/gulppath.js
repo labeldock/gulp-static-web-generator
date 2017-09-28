@@ -1,5 +1,7 @@
 (function(define){
     
+    var ejsConfig = require('./ejs.js');
+    
     var build = 'build';
     var src   = 'src';
     var serve = '.tmp';
@@ -21,7 +23,7 @@
             ],
             build: build,
             serve: serve,
-            data: require('./ejs-content.js'),
+            data: ejsConfig,
             options: {ext:'.html',layouts:'./'+src+'/layouts'}
         },
         
@@ -49,11 +51,6 @@
             imageminOptions: {
                 optimizationLevel: 8
             }
-        },
-        server: {
-            bootOnServe:true,
-            port:7890,
-            apiPath:"/api"
         }
     });
     
