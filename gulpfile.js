@@ -1,5 +1,4 @@
 var run = require('./config/run-config');
-
 var gulp = require('gulp');
 var gulpIf = require('gulp-if');
 var gulpNewer = require('gulp-newer');
@@ -8,22 +7,31 @@ var gulpConcat = require('gulp-concat');
 var gulpUglify = require('gulp-uglify');
 var gulpSize = require('gulp-size');
 var gulpCache = require('gulp-cache');
-var gulpImagemin = require('gulp-imagemin');
 var gulpSass = require('gulp-sass');
-var gulpCssnano = require('gulp-cssnano');
 var gulpAutoprefixer = require('gulp-autoprefixer');
 var gulpUseref = require('gulp-useref');
 var gulpEslint = require('gulp-eslint');
 var gulpHtmlmin = require('gulp-htmlmin');
-
 var plumber = require('gulp-plumber');
 var ejsMonster = require('gulp-ejs-monster');
-
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
-
 var del = require('del');
 var reload = browserSync.reload;
+
+var SETUP = {
+    AUTOPREFIXER_BROWSERS:[
+        'ie >= 10',
+        'ie_mob >= 10',
+        'ff >= 30',
+        'chrome >= 34',
+        'safari >= 7',
+        'opera >= 23',
+        'ios >= 7',
+        'android >= 4.4',
+        'bb >= 10'
+    ]
+};
 
 // Lint JavaScript
 gulp.task('lint', function () {
@@ -36,7 +44,6 @@ gulp.task('lint', function () {
 // Optimize images
 gulp.task('images', function () {
     return gulp.src('src/images/**/*')
-        .pipe(gulpCache(gulpImagemin({progressive: true,interlaced: true})))
         .pipe(gulp.dest('dist/images'))
         .pipe(gulpSize({ title: 'images' }));
 });
@@ -48,64 +55,57 @@ gulp.task('copy', function () {
         .pipe(gulpSize({ title: 'copy' }));
 });
 
-// Compile and automatically prefix stylesheets
-gulp.task('styles', function () {
-    var AUTOPREFIXER_BROWSERS = [
-        'ie >= 10',
-        'ie_mob >= 10',
-        'ff >= 30',
-        'chrome >= 34',
-        'safari >= 7',
-        'opera >= 23',
-        'ios >= 7',
-        'android >= 4.4',
-        'bb >= 10'
-    ];
-
-    // For best performance, don't add Sass partials to `gulp.src`
-    return gulp.src(run.styles.src)
-        .pipe(gulpNewer(run.styles.serve))
+// styles
+(function(stylesTask){
+    gulp.task('compile:styles:serve', stylesTask(run.styles.serve));
+    gulp.task('compile:styles:build', stylesTask(run.styles.build));    
+}(function(destPath){
+    return function(){
+        return gulp.src(run.styles.src)
+        .pipe(plumber())
+        .pipe(gulpNewer(destPath))
         .pipe(gulpSourcemaps.init())
-        .pipe(gulpSass({precision: 10})
-            .on('error', gulpSass.logError))
-        .pipe(gulpAutoprefixer(AUTOPREFIXER_BROWSERS))
-        .pipe(gulp.dest(run.styles.serve))
-        .pipe(gulpIf('*.css', gulpCssnano()))
-        .pipe(gulpSize({ title: 'styles' }))
-        .pipe(gulpSourcemaps.write('./'))
-        .pipe(gulp.dest(run.styles.build))
-        .pipe(gulp.dest(run.styles.serve));
-});
+        .pipe(gulpSass({outputStyle: 'compact'}).on('error', gulpSass.logError))
+        .pipe(gulpAutoprefixer(SETUP.AUTOPREFIXER_BROWSERS))
+        .pipe(gulpSourcemaps.write('/sourcemaps'))
+        .pipe(gulp.dest(destPath))
+        .pipe(gulpSize({ title: 'styles' }));
+    };
+}));
 
-gulp.task('scripts', function () {
-    // Note: Since we are not using useref in the scripts build pipeline,
-    //       you need to explicitly list your scripts here in the right order
-    //       to be correctly concatenated
-    return gulp.src(run.scripts.src)
-        .pipe(gulpNewer(run.scripts.serve))
+// scripts
+(function(scriptsTask){
+    gulp.task('compile:scripts:serve', scriptsTask(run.scripts.serve));
+    gulp.task('compile:scripts:build', scriptsTask(run.scripts.build));
+}(function(destPath){
+    return function(){
+        return gulp.src(run.scripts.src)
+        .pipe(plumber())
+        .pipe(gulpNewer(destPath))
         .pipe(gulpSourcemaps.init())
-        .pipe(gulp.dest(run.styles.serve))
-        .pipe(gulpConcat('main.min.js'))
-        .pipe(gulpUglify({ preserveComments: 'some' }))
-        .pipe(gulpSize({ title: 'scripts' }))
-        .pipe(gulpSourcemaps.write('.'))
-        .pipe(gulp.dest(run.scripts.build))
-        .pipe(gulp.dest(run.scripts.serve));
-});
+        .pipe(gulpUglify({ mangle: false }))
+        .pipe(gulpSourcemaps.write('/sourcemaps'))
+        .pipe(gulp.dest(destPath))
+        .pipe(gulpSize({ title: 'scripts' }));
+    };
+}));
 
-gulp.task('ejs', function() {
-    return gulp.src(run.ejs.src)
+// ejs
+(function(ejsTask){
+    gulp.task('compile:ejs:serve', ejsTask(run.ejs.serve));
+    gulp.task('compile:ejs:build', ejsTask(run.ejs.build));
+}(function(destPath){
+    return function() {
+        return gulp.src(run.ejs.src)
         .pipe(plumber())
         .pipe(ejsMonster(run.ejs.data,run.ejs.options))
-        .pipe(gulp.dest(run.ejs.build))
-        .pipe(gulp.dest(run.ejs.serve));
-});
+        .pipe(gulp.dest(destPath));
+    };
+}));
 
-
-gulp.task('ejs:reload',['ejs'],function(cb){
+gulp.task('ejs:reload',['compile:ejs:serve'],function(cb){
     reload(),cb();
 });
-
 
 // Scan your HTML for assets & optimize them  
 gulp.task('html', function () {
@@ -127,18 +127,17 @@ gulp.task('html', function () {
     .pipe(gulp.dest('dist'));
 });
 
+gulp.task('clean:all', function(){
+    return del([run.serve, run.build]);
+});
+
 // Clean output directory
 gulp.task('clean', function () {
     return del([run.serve, run.build, '!dist/.git'], { dot: true });
 });
 
-gulp.task('clean:dist', function(){
-    console.log("run.temporaryDist",run.temporaryDist);
-    return del(['dist'], { dot: true });
-});
-
 // Watch files for changes & reload
-gulp.task('serve', ['ejs', 'scripts', 'styles'], function () {
+gulp.task('serve', ['compile:ejs:serve', 'compile:scripts:serve', 'compile:styles:serve'], function () {
     
     var browserSyncConfig = {
         notify: false,
@@ -181,16 +180,15 @@ gulp.task('serve', ['ejs', 'scripts', 'styles'], function () {
     browserSync(browserSyncConfig);
     
     gulp.watch(['src/**/*.html'], reload);
-    gulp.watch(['src/styles/**/*.{scss,css}'], ['styles', reload]);
-    gulp.watch(['src/scripts/**/*.js'], ['scripts', reload]);
+    gulp.watch(['src/styles/**/*.{scss,css}'], ['compile:styles:serve', reload]);
+    gulp.watch(['src/scripts/**/*.js'], ['compile:scripts:serve', reload]);
     gulp.watch(['src/images/**/*'], reload);
     gulp.watch('src/**/*.ejs', ['ejs:reload']);
-
 });
 
 // Build production files, the default task
 gulp.task('build', ['clean'], function (cb) {
-  runSequence('styles', ['html', 'scripts', 'ejs', 'images', 'copy','clean:dist'], cb);
+  runSequence(['compile:styles:build', 'compile:ejs:build', 'compile:scripts:build', 'copy'], cb);
 });
 
 // Build and serve the output from the dist build
