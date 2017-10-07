@@ -131,10 +131,9 @@ gulp.task('serve', ['compile:public:serve', 'compile:ejs:serve', 'compile:script
         notify: false,
         logPrefix: 'BS',
         startPath:gulppath.serveStartPath,
-        server: {
-            baseDir: gulppath.serve,
-            port: gulppath.servePort
-        }
+        server   : { baseDir: gulppath.serve },
+        port     : gulppath.servePort,
+        ui       : { port: gulppath.servePort + 1 }
     };
     
     //temporary api server

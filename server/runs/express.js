@@ -7,7 +7,7 @@
     var app = express();
 
     //express server config 
-    app.set('port',gulptask.port);  //http://localhost:7890
+    app.set('port',gulptask.server.port);  //http://localhost:7890
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({
         extended: true
